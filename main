@@ -1,0 +1,951 @@
+
+/**
+ * @author Adam Midferd This gui represtns the board. It sets its dimentions and
+ *         paints the pieces
+ * 
+ */
+public class BoardGUI extends JPanel implements Observer {
+	int squareWidth = 30;
+	int squareHeight = 30;
+	final int WIDTH = 10;
+	final int HEIGHT = 20;
+	public Board board;
+	private boolean gameOver;
+
+	/**
+	 * @param theBoard
+	 *            is the constructor which sets the w/l
+	 */
+	public BoardGUI(Board theBoard) {
+		board = theBoard;
+		this.setPreferredSize(new Dimension(WIDTH * squareWidth, HEIGHT
+				* squareHeight));
+		this.setBackground(Color.black);
+		this.setVisible(true);
+		repaint();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+	 * 
+	 * this paints the pieces on to the board
+	 */
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		g.setColor(Color.RED);
+		squareWidth = this.getWidth() / WIDTH;
+		squareHeight = this.getHeight() / HEIGHT;
+
+		GamePieces current_piece = board.getPiece();
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 20; j++) {
+				// Need to add either 1 or 4 to i and +1 to j.
+				if (board.getBoard()[j + 4][i + 1]) {
+					g.fillRect(i * squareWidth, j * squareHeight, squareWidth,
+							squareHeight);
+				} else if (current_piece.hasBlockAt(i + 1, j + 4)) {
+					g.fillRect(i * squareWidth, j * squareHeight, squareWidth,
+							squareHeight);
+
+				}
+
+			}
+		}
+
+		g.setColor(Color.BLACK);
+		for (int i = 0; i < WIDTH; i++) {
+			g.drawLine(i * squareWidth, 0, i * squareWidth, getHeight());
+		}
+
+		for (int i = 0; i < HEIGHT; i++) {
+			g.drawLine(0, i * squareHeight, getWidth(), i * squareHeight);
+		}
+		if (gameOver == true) {
+			final Font font = new Font("SansSerif", Font.BOLD, 40);
+			g.setFont(font);
+			g.setColor(Color.RED);
+
+			g.drawString("GAME OVER", 70, 100);
+
+		}
+		g.setColor(Color.RED);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 * 
+	 * this updates the events passed to the observer
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		if (arg.equals("Board"))
+			repaint();
+		if (arg.equals("GameOver")) {
+			gameOver = true;
+		}
+		if (arg.equals("NewGame")) {
+			gameOver = false;
+		}
+
+		repaint();
+	}
+	
+	
+
+}
+package presentation;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+
+import business.Board;
+
+/**
+ * @author Adam Midferd this gui contains all the buttons and their
+ *         functionality
+ * 
+ */
+public class ButtonGUI extends JPanel {
+	Board myBoard;
+	JCheckBox rotBox;
+
+	/**
+	 * @param theBoard
+	 *            constructor
+	 */
+	public ButtonGUI(Board theBoard) {
+		myBoard = theBoard;
+		this.setLayout(new BorderLayout());
+		this.setPreferredSize(new Dimension(300, 100));
+		this.setBackground(Color.BLACK);
+		this.setVisible(true);
+		setup();
+	}
+
+	/**
+	 * the down/left/right/rotate button
+	 */
+	public void setup() {
+		JButton downFButton = new JButton("DOWN");
+		downFButton.setFocusable(false);
+		downFButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				downActionPerformed(e);
+			}
+		});
+		JButton leftButton = new JButton("LEFT");
+		leftButton.setFocusable(false);
+		leftButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				leftActionPerformed(e);
+			}
+		});
+		JButton rightButton = new JButton("RIGHT");
+		rightButton.setFocusable(false);
+		rightButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				rightActionPerformed(e);
+			}
+		});
+
+		JButton rotateButton = new JButton("ROTATE");
+		rotateButton.setFocusable(false);
+		rotBox = new JCheckBox("CC");
+		rotBox.setFocusable(false);
+
+		rotateButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				rotateActionPerformed(e);
+			}
+		});
+
+		JPanel leftBPanel = new JPanel();
+		leftBPanel.setBackground(Color.BLACK);
+		leftBPanel.add(leftButton);
+		JPanel rightBPanel = new JPanel();
+		rightBPanel.setBackground(Color.BLACK);
+		rightBPanel.add(rightButton);
+		JPanel centerBPanel = new JPanel();
+		centerBPanel.setBackground(Color.BLACK);
+		centerBPanel.add(rotBox);
+		JPanel rotatePanel = new JPanel();
+		rotatePanel.setBackground(Color.BLACK);
+		rotatePanel.add(rotateButton);
+		JPanel bottomButtonPanel = new JPanel(new GridLayout(1, 3));
+		bottomButtonPanel.setBackground(Color.BLACK);
+		bottomButtonPanel.add(leftBPanel);
+		bottomButtonPanel.add(centerBPanel);
+		bottomButtonPanel.add(rightBPanel);
+
+		JPanel downButtonPanel = new JPanel();
+		downButtonPanel.setBackground(Color.BLACK);
+		downButtonPanel.add(downFButton);
+
+		JPanel directionPanel = new JPanel(new GridLayout(4, 1));
+		directionPanel.setBackground(Color.BLACK);
+		directionPanel.add(rotatePanel, BorderLayout.CENTER);
+		directionPanel.add(bottomButtonPanel, BorderLayout.NORTH);
+		directionPanel.add(downButtonPanel, BorderLayout.SOUTH);
+
+		JPanel optionPanel = new JPanel(new GridLayout(4, 1));
+		optionPanel.setBackground(Color.BLACK);
+
+		JButton startButton = new JButton("Start");
+		JPanel startPanel = new JPanel();
+		startPanel.setBackground(Color.BLACK);
+		startPanel.add(startButton);
+		startButton.setFocusable(false);
+		startButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				startActionPerformed(e);
+			}
+		});
+
+		JButton newGame = new JButton("New Game");
+		JPanel gameOverPanel = new JPanel();
+		gameOverPanel.setBackground(Color.BLACK);
+		gameOverPanel.add(newGame);
+		newGame.setFocusable(false);
+		newGame.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newGameActionPerformed(e);
+			}
+		});
+
+		JButton dropButton = new JButton("Drop");
+		JPanel dropPanel = new JPanel();
+		dropPanel.setBackground(Color.BLACK);
+		dropPanel.add(dropButton);
+		dropButton.setFocusable(false);
+		dropButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dropActionPerformed(e);
+			}
+		});
+
+		JButton pauseButton = new JButton("Pause");
+		JPanel pausePanel = new JPanel();
+		pausePanel.setBackground(Color.BLACK);
+		pausePanel.add(pauseButton);
+		pauseButton.setFocusable(false);
+		pauseButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				pauseActionPerformed(e);
+			}
+		});
+
+		optionPanel.add(startPanel);
+		optionPanel.add(dropPanel);
+		optionPanel.add(pausePanel);
+		optionPanel.add(gameOverPanel);
+
+		JPanel buttonPanel = new JPanel(new BorderLayout());
+		buttonPanel.setBackground(Color.BLACK);
+		buttonPanel.add(optionPanel, BorderLayout.EAST);
+		buttonPanel.add(directionPanel, BorderLayout.CENTER);
+
+		this.add(buttonPanel);
+	}
+
+	private void startActionPerformed(java.awt.event.ActionEvent evt) {
+		myBoard.start();
+	}
+
+	private void dropActionPerformed(java.awt.event.ActionEvent evt) {
+		myBoard.drop();
+	}
+
+	private void newGameActionPerformed(java.awt.event.ActionEvent evt) {
+		myBoard.newGame();
+	}
+
+	private void pauseActionPerformed(java.awt.event.ActionEvent evt) {
+		myBoard.pause();
+	}
+
+	private void leftActionPerformed(java.awt.event.ActionEvent evt) {
+		myBoard.moveLeft();
+	}
+
+	private void rightActionPerformed(java.awt.event.ActionEvent evt) {
+		myBoard.moveRight();
+	}
+
+	private void downActionPerformed(java.awt.event.ActionEvent evt) {
+		myBoard.moveDown();
+	}
+
+	
+	private void rotateActionPerformed(java.awt.event.ActionEvent evt) {
+		if (rotBox.isSelected()) {
+			myBoard.rotateCounter();
+		} else {
+			myBoard.rotateClock();
+		}
+	}
+
+	public boolean getRotate() {
+		return rotBox.isSelected();
+	}
+
+}
+package presentation;
+
+import java.awt.BorderLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.UIManager;
+
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
+import business.Board;
+
+/**
+ * @author Adam Midferd
+ * 
+ *         this is main gui for the game. It sets up all the panels, buttons and
+ *         the frame
+ * 
+ */
+public class GUI extends JFrame implements KeyListener {
+
+	final Board myBoard;
+
+	final JButton fStartButton = new JButton("Start");
+
+	final JLabel fScoreLabel = new JLabel("Score:");
+
+	public BoardGUI boardPanel;
+
+	public ButtonGUI buttonPanel;
+
+	public ScorePanel scorePanel;
+
+	public NextPieceGUI nextPanel;
+
+	/**
+	 * constructor
+	 */
+	public GUI() {
+		myBoard = new Board();
+		this.setLayout(new BorderLayout());
+		JPanel thePanel = new JPanel(new BorderLayout());
+		buttonPanel = new ButtonGUI(myBoard);
+		boardPanel = new BoardGUI(myBoard);
+		myBoard.addObserver(boardPanel);
+		nextPanel = new NextPieceGUI(myBoard);
+		myBoard.addObserver(nextPanel);
+		scorePanel = new ScorePanel(myBoard);
+		myBoard.addObserver(scorePanel);
+		thePanel.add(buttonPanel, BorderLayout.NORTH);
+		thePanel.add(boardPanel, BorderLayout.CENTER);
+
+		JPanel eastPanel = new JPanel(new BorderLayout());
+		eastPanel.add(nextPanel, BorderLayout.NORTH);
+		eastPanel.add(scorePanel, BorderLayout.CENTER);
+
+		add(thePanel, BorderLayout.WEST);
+		add(eastPanel, BorderLayout.EAST);
+		pack();
+		this.setVisible(true);
+		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		this.setFocusable(true);
+		requestFocus();
+		this.addKeyListener(new KeyListener());
+		
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+		}
+		catch (Exception ex)
+		{
+		}
+	}
+
+	/**
+	 * @author Adam Midferd This is the action listener options for the key
+	 *         strokes
+	 * 
+	 */
+	private class KeyListener extends KeyAdapter {
+
+		public void keyPressed(KeyEvent e) {
+			switch (e.getKeyCode()) {
+
+			case KeyEvent.VK_LEFT:
+				myBoard.moveLeft();
+				break;
+
+			case KeyEvent.VK_RIGHT:
+				myBoard.moveRight();
+				break;
+
+			case KeyEvent.VK_UP:
+				if (buttonPanel.getRotate())
+					myBoard.rotateCounter();
+				else
+					myBoard.rotateClock();
+
+				break;
+
+			case KeyEvent.VK_DOWN:
+				myBoard.moveDown();
+
+				break;
+
+			case KeyEvent.VK_SPACE:
+				myBoard.drop();
+
+			}
+
+		}
+	}
+
+	public void keyReleased(KeyEvent e) {
+
+	}
+
+	public void keyTyped(KeyEvent e) {
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+
+	}
+
+	/**
+	 * @param args
+	 *            the main method for the gui
+	 */
+	public static void main(String[] args) {
+		GUI TetrisGUI = new GUI();
+		
+		TetrisGUI.playAudio();
+	}
+
+	/**
+	 * this is the audio file and the call for the path
+	 */
+	public void playAudio() {
+
+		try {
+
+			AudioPlayer p = AudioPlayer.player;
+
+			AudioStream as =
+
+			new AudioStream(
+					new FileInputStream(
+							"E:\\Demon Hunter - One Thousand Apologies.wav"));
+
+			p.start(as);
+
+		}
+
+		catch (IOException IOE) {
+			System.err.println(IOE);
+		}
+
+	}
+	
+	
+
+}
+package business;
+
+import java.awt.Point;
+import java.util.Observable;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import presentation.ScorePanel;
+
+/**
+ * @author Adam Midferd
+ * 
+ *         This will be the main board for the game
+ * 
+ */
+public class Board extends Observable {
+
+	private final int pieceNum;
+	private final boolean BOUNDRY = true;
+	private GamePieces currentPiece;
+	private GamePieces nextPiece;
+	private GamePieces[] myTestPieces;
+	private int myTestPieceIndex;
+	protected boolean paused = true;
+	protected boolean gameStart = false;
+	private boolean pause = false;
+	// added game on
+	private boolean gameOn = false;
+	private boolean drop = false;
+	private Timer timer;
+
+	/**
+	 * [y][x]
+	 */
+	private boolean myGrid[][] = new boolean[25][12];
+
+	/**
+	 * constructor
+	 */
+	public Board() {
+		boundry();
+		pieceNum = 7;
+		init();
+	}
+
+	public Board(GamePieces[] someTestPieces) {
+		boundry();
+		pieceNum = 7;
+
+		currentPiece = someTestPieces[0];
+		nextPiece = someTestPieces[1];
+		myTestPieceIndex = 2;
+	}
+
+	/**
+	 * This initializes the game
+	 */
+	private void init() {
+		currentPiece = randomPiece();
+		nextPiece = randomPiece();
+	}
+
+	/**
+	 * starts the game
+	 */
+	public void start() {
+		paused = false;
+
+	}
+
+	/**
+	 * pauses the game
+	 */
+	public void pause() {
+		paused = true;
+	}
+
+	/**
+	 * keeps the timer
+	 */
+	public void Timer() {
+		timer = new Timer();
+		timer.scheduleAtFixedRate(new TTask(), 500, 500);
+	}
+
+	/**
+	 * @author Adam Midferd
+	 * 
+	 */
+	private class TTask extends TimerTask {
+
+		public void run() {
+			if (!paused) {
+				tick();
+				setChanged();
+				notifyObservers("Board");
+			}
+
+		}
+
+	}
+
+	/**
+	 * Goes to the next piece
+	 */
+	private void advanceNextPiece() {
+
+		currentPiece = nextPiece;
+		if (myTestPieces == null) {
+			nextPiece = randomPiece();
+		} else {
+			nextPiece = myTestPieces[myTestPieceIndex];
+			myTestPieceIndex++;
+		}
+	}
+
+	/**
+	 * @return the individual pieces
+	 */
+	private GamePieces randomPiece() {
+		Random rand = new Random();
+		int value = rand.nextInt(pieceNum - 1);
+		GamePieces thePiece;
+
+		/**
+		 * switch that creates a new piece the random generator gives it a
+		 * random case number
+		 */
+		switch (value) {
+		case 0:
+			thePiece = new TheLeftDog();
+			break;
+		case 1:
+			thePiece = new TheLeftL();
+			break;
+		case 2:
+			thePiece = new TheSquare();
+			break;
+		case 3:
+			thePiece = new TheRightDog();
+			break;
+		case 4:
+			thePiece = new TheStick();
+			break;
+		case 5:
+			thePiece = new TheRightL();
+			break;
+		default:
+			thePiece = new TheT();
+
+		}
+		return thePiece;
+	}
+
+	/**
+	 * This sets the limit as how far the piece can move
+	 */
+	public void boundry() {
+		for (int row = 0; row < myGrid.length; row++) {
+			for (int column = 0; column < myGrid[row].length; column++) {
+				if (row == myGrid.length - 1)
+					myGrid[row][column] = BOUNDRY;
+				if (column == 0)
+					myGrid[row][column] = BOUNDRY;
+				if (column == 11)
+					myGrid[row][column] = BOUNDRY;
+			}
+		}
+	}
+
+	/**
+	 * This divides the game into segments
+	 */
+	public void tick() {
+		if (gameOn)
+			moveDown();
+	}
+
+	/**
+	 * The rotation method
+	 */
+	public void rotateCounter() {
+		if (!paused && gameOn) {
+			currentPiece.rotateCounter();
+			if (checkCollision() == true) {
+				currentPiece.rotateClock();
+			}
+			setChanged();
+			notifyObservers("Board");
+		}
+	}
+
+	/**
+	 * This rotates the piece clockwise
+	 */
+	public void rotateClock() {
+		// added && gameon
+		if (!paused && gameOn) {
+			currentPiece.rotateClock();
+			if (checkCollision() == true)
+				currentPiece.rotateCounter();
+			setChanged();
+			notifyObservers("Board");
+		}
+	}
+
+	/**
+	 * Moves the piece to the left
+	 */
+	public void moveLeft() {
+		// added && gameon
+		if (!paused && gameOn) {
+			currentPiece.left();
+			if (checkCollision() == true)
+				currentPiece.right();
+			setChanged();
+			notifyObservers("Board");
+		}
+	}
+
+	/**
+	 * Moves the piece to the right
+	 */
+	public void moveRight() {
+		// added && gameon
+		if (!paused && gameOn) {
+			currentPiece.right();
+			if (checkCollision() == true)
+				currentPiece.left();
+			setChanged();
+			notifyObservers("Board");
+		}
+	}
+
+	/**
+	 * Move the piece down
+	 */
+	public void moveDown() {
+		// added && gameon
+		if (!paused && gameOn) {
+			currentPiece.down();
+			if (checkCollision() == true) {
+				lockPiece();
+			}
+			setChanged();
+			notifyObservers("Board");
+		}
+
+	}
+
+	/**
+	 * drops all the way down
+	 */
+	public void drop() {
+		// added game on true
+		if (gameOn && !paused) {
+			while (checkCollision() == false) {
+				currentPiece.down();
+			}
+			lockPiece();
+			setChanged();
+			notifyObservers("Board");
+		}
+
+	}
+
+	/**
+	 * @return collision true or false if true sets current row
+	 */
+	public boolean checkCollision() {
+		Point[] blockData = new Point[4];
+		blockData = this.getBlockData();
+		for (int i = 0; i < blockData.length; i++) {
+			if (myGrid[blockData[i].y][blockData[i].x] == true) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * gets current position of the piece then hard codes it on the board one
+	 * line down
+	 */
+	public void lockPiece() {
+		Point[] blockData = new Point[4];
+		blockData = this.getBlockData();
+		for (int i = 0; i < blockData.length; i++) {
+			myGrid[blockData[i].y - 1][blockData[i].x] = true;
+		}
+		scanAndClear();
+		if (CheckGameOver()) {
+			gameOn = false;
+			setChanged();
+			notifyObservers("GameOver");
+		}
+
+		advanceNextPiece();
+	}
+
+	/**
+	 * @return if game is over
+	 */
+	public boolean CheckGameOver() {
+		boolean gameOver = false;
+		for (int i = 0; i < 10; i++) {
+			if (myGrid[3][i + 1]) {
+				gameOver = true;
+			}
+		}
+		return gameOver;
+	}
+
+	/**
+	 * @param piece
+	 *            adds the piece to the board
+	 */
+	public void addPiece(GamePieces piece) {
+		if (piece != null) {
+			Point[] blocks = getBlockData();
+
+			for (int count = 0; count < 4; count++) {
+				int x = blocks[count].x;
+				int y = blocks[count].y;
+
+				myGrid[x][y] = true;
+			}
+		}
+	}
+
+	/**
+	 * @param row
+	 *            removes the row when full
+	 */
+	public void removeRow(int row) {
+
+		setChanged();
+		notifyObservers("score");
+		for (int tempRow = row; tempRow > 0; tempRow--) {
+			for (int tempCol = 1; tempCol < myGrid[0].length - 1; tempCol++) {
+				myGrid[tempRow][tempCol] = myGrid[tempRow - 1][tempCol];
+			}
+		}
+	}
+
+	/**
+	 * This calls the remove row to remove the row and move row down 1
+	 */
+	public void scanAndClear() {
+		for (int row = 0; row < myGrid.length - 1; row++) {
+			boolean rowIsFull = true;
+			for (int column = 0; column < myGrid[column].length; column++) {
+				rowIsFull &= myGrid[row][column];
+			}
+			if (rowIsFull) {
+
+				this.removeRow(row);
+			}
+		}
+	}
+
+	/**
+	 * @param nextpiece
+	 *            the next_Piece to set
+	 */
+	public void setNextPiece(GamePieces nextpiece) {
+		this.nextPiece = nextpiece;
+	}
+
+	/**
+	 * @return the nextPiece
+	 */
+	public GamePieces getNextPiece() {
+		return nextPiece;
+	}
+
+	/**
+	 * @return the array containing the piece as a block
+	 */
+	public Point[] getBlockData() {
+		Point[] array = new Point[4];
+		int count = 0;
+		for (int row = 0; row < currentPiece.currentPosition.length; row++) {
+			for (int column = 0; column < currentPiece.currentPosition[row].length; column++) {
+				if (currentPiece.currentPosition[row][column] == true) {
+					array[count] = new Point(column
+							+ currentPiece.boardPosition[0], row
+							+ currentPiece.boardPosition[1]);
+					count++;
+				}
+			}
+		}
+		return array;
+	}
+
+	/**
+	 * @return the current piece
+	 */
+	public GamePieces getCurrentPiece() {
+		return currentPiece;
+	}
+
+	/**
+	 * @param currentpiece
+	 *            sets the current piece
+	 */
+	public void setCurrentPiece(GamePieces currentpiece) {
+		this.currentPiece = currentpiece;
+	}
+
+	/**
+	 * @returns my grid/board
+	 */
+	public boolean[][] getBoard() {
+		return myGrid;
+	}
+
+	/**
+	 * @returns the current piece
+	 */
+	public GamePieces getPiece() {
+		return currentPiece;
+	}
+
+	/**
+	 * starts a new game
+	 */
+	public void newGame() {
+		if (timer != null)
+			timer.cancel();
+		gameOn = true;
+		pause = false;
+		drop = false;
+		// Clears entire board
+		for (int i = 0; i < myGrid.length; i++) {
+			for (int j = 0; j < myGrid[i].length; j++) {
+				myGrid[i][j] = false;
+			}
+		}
+
+		init();
+		boundry();
+		setChanged();
+		notifyObservers("NewGame");
+		timer = new Timer();
+		timer.scheduleAtFixedRate(new TTask(), 1000, 1000);
+
+	}
+
+	/*
+	 * 
+	 * this prints out the current position of the piece as "*" if the piece has
+	 * a downward collision it will print and "X" of that piece telling it to
+	 * become part of the board
+	 */
+	public String toString() {
+		String s = "";
+		for (int x = 4; x < myGrid.length; x++) {
+			s = s + "\n";
+			for (int y = 0; y < myGrid[x].length; y++) {
+				if (myGrid[x][y] == true) {
+					s += "X";
+				} else if (currentPiece.hasBlockAt(y, x)) {
+					s += "X";
+				} else {
+					s += " ";
+				}
+			}
+			s += "";
+		}
+		s += "\n ";
+		for (int i = 0; i < myGrid.length; i++) {
+			s += " ";
+		}
+		return s;
+	}
+
+}
